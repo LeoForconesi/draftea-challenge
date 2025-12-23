@@ -31,6 +31,27 @@ jobs:
           go test ./... -coverprofile=coverage.out
           go tool cover -func=coverage.out
 
+      - name: Generate Coverage Badge
+        uses: tj-actions/coverage-badge-go@v3
+        id: coverage
+        with:
+          filename: coverage.out  # El archivo que ya generás
+
+      - name: Verify if README changed
+        uses: tj-actions/verify-changed-files@v20
+        id: verify
+        with:
+          files: README.md
+
+      - name: Commit & Push updated README with badge
+        if: steps.verify.outputs.files_changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "chore: Update coverage badge"
+          git push
+
       - name: Lint
         uses: golangci/golangci-lint-action@v6
         with:
