@@ -9,6 +9,7 @@ import (
 type WalletModel struct {
 	ID        string `gorm:"primaryKey;type:varchar(36)"`
 	UserID    string `gorm:"type:varchar(36);uniqueIndex"`
+	Name      string `gorm:"type:char(20)"`
 	CreatedAt time.Time
 }
 

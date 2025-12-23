@@ -43,6 +43,9 @@ func run() error {
 	}
 	defer func() { _ = dbCleanup() }()
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	rabbitCfg := rabbitmq.Config{
 		URL:                   cfg.Rabbit.URL,
 		Exchange:              cfg.Rabbit.Exchange,
@@ -53,7 +56,17 @@ func run() error {
 
 	publisher, publisherCleanup, err := rabbitmq.NewPublisher(rabbitCfg, zapLogger)
 	if err != nil {
-		return err
+		publisher, publisherCleanup, err = connectPublisherWithRetry(
+			ctx,
+			rabbitCfg,
+			zapLogger,
+			cfg.Rabbit.RelayMaxRetries,
+			cfg.Rabbit.RelayInitialBackoff,
+			cfg.Rabbit.RelayMaxBackoff,
+		)
+		if err != nil {
+			return err
+		}
 	}
 	defer func() { _ = publisherCleanup() }()
 
@@ -67,9 +80,6 @@ func run() error {
 		MaxBackoff:     cfg.Rabbit.RelayMaxBackoff,
 	})
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
@@ -80,9 +90,65 @@ func run() error {
 			zapLogger.Info("outbox relay shutting down")
 			return nil
 		case <-ticker.C:
+			pending, err := outboxRepo.GetPendingEvents(ctx, cfg.Rabbit.RelayBatchSize)
+			if err != nil {
+				zapLogger.Error("outbox relay fetch error", zap.Error(err))
+				continue
+			}
+			zapLogger.Debug("outbox relay tick", zap.Int("pending", len(pending)))
+			if len(pending) == 0 {
+				continue
+			}
 			if err := relayWorker.ProcessOnce(ctx); err != nil {
 				zapLogger.Error("outbox relay error", zap.Error(err))
+				continue
 			}
+			zapLogger.Debug("outbox relay processed batch", zap.Int("count", len(pending)))
 		}
 	}
+}
+
+func connectPublisherWithRetry(
+	ctx context.Context,
+	cfg rabbitmq.Config,
+	log *zap.Logger,
+	maxRetries int,
+	initialBackoff time.Duration,
+	maxBackoff time.Duration,
+) (*rabbitmq.Publisher, func() error, error) {
+	attempts := maxRetries + 1
+	if attempts <= 0 {
+		attempts = 1
+	}
+	backoff := initialBackoff
+	if backoff <= 0 {
+		backoff = 200 * time.Millisecond
+	}
+	if maxBackoff <= 0 {
+		maxBackoff = 2 * time.Second
+	}
+
+	var lastErr error
+	for i := 0; i < attempts; i++ {
+		publisher, cleanup, err := rabbitmq.NewPublisher(cfg, log)
+		if err == nil {
+			return publisher, cleanup, nil
+		}
+		lastErr = err
+		log.Warn("rabbitmq publisher connect failed", zap.Error(err))
+		if i == attempts-1 {
+			break
+		}
+		select {
+		case <-time.After(backoff):
+		case <-ctx.Done():
+			return nil, nil, ctx.Err()
+		}
+		next := backoff * 2
+		if next > maxBackoff {
+			next = maxBackoff
+		}
+		backoff = next
+	}
+	return nil, nil, lastErr
 }

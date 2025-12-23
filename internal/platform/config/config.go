@@ -110,8 +110,11 @@ func Load() (Config, error) {
 	if configFile := os.Getenv("CONFIG_FILE"); configFile != "" {
 		v.SetConfigFile(configFile)
 	} else {
-		v.SetConfigName("config")
-		v.AddConfigPath(".")
+		env := os.Getenv("APP_ENV")
+		if env == "" {
+			env = "local"
+		}
+		v.SetConfigFile(defaultConfigPath(env))
 	}
 
 	if err := v.ReadInConfig(); err != nil {
@@ -132,6 +135,19 @@ func Load() (Config, error) {
 
 	applyEnvOverrides(&cfg, envCfg)
 	return cfg, nil
+}
+
+func defaultConfigPath(env string) string {
+	switch env {
+	case "docker":
+		return "config/config.docker.yaml"
+	case "stage":
+		return "config/config.stage.yaml"
+	case "prod":
+		return "config/config.prod.yaml"
+	default:
+		return "config/config.local.yaml"
+	}
 }
 
 type envConfig struct {

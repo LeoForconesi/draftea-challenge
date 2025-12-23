@@ -63,9 +63,12 @@ func Build(cfg config.Config) (*App, error) {
 	)
 	balanceService := wallets.NewGetBalanceService(persistence)
 	transactionsService := wallets.NewGetTransactionsService(persistence)
+	topUpService := wallets.NewTopUpService(persistence, persistence)
+	listService := wallets.NewListWalletsService(persistence)
+	createWalletService := wallets.NewCreateWalletService(persistence)
 
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
-	walletHandler := handlers.NewWalletHandler(balanceService, transactionsService)
+	walletHandler := handlers.NewWalletHandler(balanceService, transactionsService, topUpService, listService, createWalletService)
 
 	router := httpapi.NewRouter(httpapi.RouterDeps{
 		Logger:         zapLogger,

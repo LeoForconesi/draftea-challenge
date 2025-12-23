@@ -64,6 +64,10 @@ func (m *mockWalletRepo) UpdateBalance(ctx context.Context, userID uuid.UUID, cu
 	return nil
 }
 
+func (m *mockWalletRepo) ListWallets(ctx context.Context, limit, offset int) ([]*wallet.Wallet, int, error) {
+	return nil, 0, nil
+}
+
 type mockGateway struct {
 	status string
 	err    error

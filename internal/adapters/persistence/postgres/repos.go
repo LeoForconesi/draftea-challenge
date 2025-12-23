@@ -12,6 +12,7 @@ import (
 	appoutbox "draftea-challenge/internal/application/outbox"
 	"draftea-challenge/internal/application/payments"
 	"draftea-challenge/internal/application/wallets"
+	domainerrors "draftea-challenge/internal/domain/errors"
 	domaintx "draftea-challenge/internal/domain/transaction"
 	domainwallet "draftea-challenge/internal/domain/wallet"
 )
@@ -29,7 +30,7 @@ func (p *PostgresPersistence) GetWallet(ctx context.Context, userID uuid.UUID) (
 	var w WalletModel
 	if err := p.db.WithContext(ctx).Where("user_id = ?", userID.String()).First(&w).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("not found")
+			return nil, domainerrors.NewNotFoundError("wallet not found")
 		}
 		return nil, err
 	}
@@ -46,11 +47,12 @@ func (p *PostgresPersistence) GetWallet(ctx context.Context, userID uuid.UUID) (
 		ID:       uuid.MustParse(w.ID),
 		UserID:   uuid.MustParse(w.UserID),
 		Balances: m,
+		Name:     w.Name,
 	}, nil
 }
 
 func (p *PostgresPersistence) CreateWallet(ctx context.Context, w *domainwallet.Wallet) error {
-	wm := WalletModel{ID: w.ID.String(), UserID: w.UserID.String(), CreatedAt: time.Now()}
+	wm := WalletModel{ID: w.ID.String(), UserID: w.UserID.String(), Name: w.Name, CreatedAt: time.Now()}
 	if err := p.db.WithContext(ctx).Create(&wm).Error; err != nil {
 		return err
 	}
@@ -70,8 +72,23 @@ func (p *PostgresPersistence) UpdateBalance(ctx context.Context, userID uuid.UUI
 		// Lock the specific row for update
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("user_id = ? AND currency = ?", userID.String(), currency).First(&bal).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// create row
-				b := WalletBalanceModel{ID: uuid.NewString(), WalletID: uuid.New().String(), UserID: userID.String(), Currency: currency, CurrentBalance: newBalance, CreatedAt: time.Now(), UpdatedAt: time.Now()}
+				var walletRow WalletModel
+				if err := tx.Where("user_id = ?", userID.String()).First(&walletRow).Error; err != nil {
+					if errors.Is(err, gorm.ErrRecordNotFound) {
+						return domainerrors.NewNotFoundError("wallet not found")
+					}
+					return err
+				}
+				// create row with the existing wallet_id
+				b := WalletBalanceModel{
+					ID:             uuid.NewString(),
+					WalletID:       walletRow.ID,
+					UserID:         userID.String(),
+					Currency:       currency,
+					CurrentBalance: newBalance,
+					CreatedAt:      time.Now(),
+					UpdatedAt:      time.Now(),
+				}
 				if err := tx.Create(&b).Error; err != nil {
 					return err
 				}
@@ -90,6 +107,55 @@ func (p *PostgresPersistence) UpdateBalance(ctx context.Context, userID uuid.UUI
 
 // Ensure PostgresPersistence implements WalletRepository interface
 var _ wallets.WalletRepository = (*PostgresPersistence)(nil)
+
+func (p *PostgresPersistence) ListWallets(ctx context.Context, limit, offset int) ([]*domainwallet.Wallet, int, error) {
+	var total int64
+	if err := p.db.WithContext(ctx).Model(&WalletModel{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var rows []WalletModel
+	if err := p.db.WithContext(ctx).Order("created_at").Limit(limit).Offset(offset).Find(&rows).Error; err != nil {
+		return nil, 0, err
+	}
+	if len(rows) == 0 {
+		return []*domainwallet.Wallet{}, int(total), nil
+	}
+
+	userIDs := make([]string, 0, len(rows))
+	for _, r := range rows {
+		userIDs = append(userIDs, r.UserID)
+	}
+
+	var balances []WalletBalanceModel
+	if err := p.db.WithContext(ctx).Where("user_id IN ?", userIDs).Find(&balances).Error; err != nil {
+		return nil, 0, err
+	}
+
+	balMap := make(map[string]map[string]int64)
+	for _, b := range balances {
+		if _, ok := balMap[b.UserID]; !ok {
+			balMap[b.UserID] = make(map[string]int64)
+		}
+		balMap[b.UserID][b.Currency] = b.CurrentBalance
+	}
+
+	out := make([]*domainwallet.Wallet, 0, len(rows))
+	for _, r := range rows {
+		balances := balMap[r.UserID]
+		if balances == nil {
+			balances = make(map[string]int64)
+		}
+		out = append(out, &domainwallet.Wallet{
+			ID:       uuid.MustParse(r.ID),
+			UserID:   uuid.MustParse(r.UserID),
+			Balances: balances,
+			Name:     r.Name,
+		})
+	}
+
+	return out, int(total), nil
+}
 
 // PaymentRepository & IdempotencyRepo & Outbox
 func (p *PostgresPersistence) CreateTransaction(ctx context.Context, txDomain *domaintx.Transaction) error {
@@ -116,7 +182,7 @@ func (p *PostgresPersistence) GetTransactionByID(ctx context.Context, txID uuid.
 	var m TransactionModel
 	if err := p.db.WithContext(ctx).Where("id = ?", txID.String()).First(&m).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("not found")
+			return nil, domainerrors.NewNotFoundError("transaction not found")
 		}
 		return nil, err
 	}

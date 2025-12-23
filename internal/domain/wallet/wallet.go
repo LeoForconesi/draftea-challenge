@@ -11,6 +11,7 @@ type Wallet struct {
 	ID       uuid.UUID        `json:"id"`
 	UserID   uuid.UUID        `json:"user_id"`
 	Balances map[string]int64 `json:"balances"` // currency -> balance in minor units
+	Name     string           `json:"name,omitempty"`
 }
 
 // Balance es un value object para representar un saldo en una moneda específica.
@@ -21,13 +22,22 @@ type Balance struct {
 
 // NewWallet crea una nueva wallet para un usuario.
 func NewWallet(userID uuid.UUID) (*Wallet, error) {
+	return NewWalletWithName(userID, "")
+}
+
+// NewWalletWithName crea una wallet con un nombre opcional.
+func NewWalletWithName(userID uuid.UUID, name string) (*Wallet, error) {
 	if userID == uuid.Nil {
 		return nil, errors.NewValidationError("user_id cannot be nil", nil)
+	}
+	if len(name) > 20 {
+		return nil, errors.NewValidationError("name must be at most 20 characters", map[string]interface{}{"name": name})
 	}
 	return &Wallet{
 		ID:       uuid.New(),
 		UserID:   userID,
 		Balances: make(map[string]int64),
+		Name:     name,
 	}, nil
 }
 
