@@ -44,8 +44,14 @@ type RabbitConfig struct {
 
 // GatewayConfig defines external gateway settings.
 type GatewayConfig struct {
-	URL     string        `mapstructure:"url"`
-	Timeout time.Duration `mapstructure:"timeout"`
+	URL                    string        `mapstructure:"url"`
+	Timeout                time.Duration `mapstructure:"timeout"`
+	MaxRetries             int           `mapstructure:"max_retries"`
+	RetryInitialBackoff    time.Duration `mapstructure:"retry_initial_backoff"`
+	RetryMaxBackoff        time.Duration `mapstructure:"retry_max_backoff"`
+	CircuitBreakerFailures int           `mapstructure:"circuit_breaker_failures"`
+	CircuitBreakerCooldown time.Duration `mapstructure:"circuit_breaker_cooldown"`
+	MaxInFlight            int           `mapstructure:"max_in_flight"`
 }
 
 // LoggerConfig defines logging settings.
@@ -74,6 +80,12 @@ func Load() (Config, error) {
 	v.SetDefault("rabbit.url", "amqp://guest:guest@localhost:5672/")
 	v.SetDefault("gateway.url", "http://localhost:8081")
 	v.SetDefault("gateway.timeout", 5*time.Second)
+	v.SetDefault("gateway.max_retries", 2)
+	v.SetDefault("gateway.retry_initial_backoff", 200*time.Millisecond)
+	v.SetDefault("gateway.retry_max_backoff", 2*time.Second)
+	v.SetDefault("gateway.circuit_breaker_failures", 5)
+	v.SetDefault("gateway.circuit_breaker_cooldown", 10*time.Second)
+	v.SetDefault("gateway.max_in_flight", 20)
 	v.SetDefault("logger.level", "info")
 	v.SetDefault("logger.development", true)
 
@@ -124,8 +136,14 @@ type envConfig struct {
 		URL *string `envconfig:"RABBITMQ_URL"`
 	}
 	Gateway struct {
-		URL     *string        `envconfig:"GATEWAY_URL"`
-		Timeout *time.Duration `envconfig:"GATEWAY_TIMEOUT"`
+		URL                    *string        `envconfig:"GATEWAY_URL"`
+		Timeout                *time.Duration `envconfig:"GATEWAY_TIMEOUT"`
+		MaxRetries             *int           `envconfig:"GATEWAY_MAX_RETRIES"`
+		RetryInitialBackoff    *time.Duration `envconfig:"GATEWAY_RETRY_INITIAL_BACKOFF"`
+		RetryMaxBackoff        *time.Duration `envconfig:"GATEWAY_RETRY_MAX_BACKOFF"`
+		CircuitBreakerFailures *int           `envconfig:"GATEWAY_CIRCUIT_BREAKER_FAILURES"`
+		CircuitBreakerCooldown *time.Duration `envconfig:"GATEWAY_CIRCUIT_BREAKER_COOLDOWN"`
+		MaxInFlight            *int           `envconfig:"GATEWAY_MAX_IN_FLIGHT"`
 	}
 	Logger struct {
 		Level       *string `envconfig:"LOG_LEVEL"`
@@ -178,6 +196,24 @@ func applyEnvOverrides(cfg *Config, env envConfig) {
 	}
 	if env.Gateway.Timeout != nil {
 		cfg.Gateway.Timeout = *env.Gateway.Timeout
+	}
+	if env.Gateway.MaxRetries != nil {
+		cfg.Gateway.MaxRetries = *env.Gateway.MaxRetries
+	}
+	if env.Gateway.RetryInitialBackoff != nil {
+		cfg.Gateway.RetryInitialBackoff = *env.Gateway.RetryInitialBackoff
+	}
+	if env.Gateway.RetryMaxBackoff != nil {
+		cfg.Gateway.RetryMaxBackoff = *env.Gateway.RetryMaxBackoff
+	}
+	if env.Gateway.CircuitBreakerFailures != nil {
+		cfg.Gateway.CircuitBreakerFailures = *env.Gateway.CircuitBreakerFailures
+	}
+	if env.Gateway.CircuitBreakerCooldown != nil {
+		cfg.Gateway.CircuitBreakerCooldown = *env.Gateway.CircuitBreakerCooldown
+	}
+	if env.Gateway.MaxInFlight != nil {
+		cfg.Gateway.MaxInFlight = *env.Gateway.MaxInFlight
 	}
 
 	if env.Logger.Level != nil {

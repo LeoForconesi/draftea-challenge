@@ -37,19 +37,33 @@ type paymentRequest struct {
 func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	userID, err := uuid.Parse(c.Param("user_id"))
 	if err != nil {
-		presenter.WriteError(c, errors.NewValidationError("invalid user_id", nil))
+		presenter.WriteError(c, errors.NewValidationError("invalid user_id", map[string]interface{}{"user_id": c.Param("user_id")}))
 		return
 	}
 
 	var body paymentRequest
 	if err := c.ShouldBindJSON(&body); err != nil {
-		presenter.WriteError(c, errors.NewValidationError("invalid request body", nil))
+		presenter.WriteError(c, errors.NewValidationError("invalid request body", map[string]interface{}{"error": err.Error()}))
 		return
 	}
 
+	details := make(map[string]interface{})
+
 	providerID, err := uuid.Parse(body.ProviderID)
 	if err != nil {
-		presenter.WriteError(c, errors.NewValidationError("invalid provider_id", nil))
+		details["provider_id"] = body.ProviderID
+	}
+	if body.ExternalReference == "" {
+		details["external_reference"] = "required"
+	}
+	if body.Amount <= 0 {
+		details["amount"] = body.Amount
+	}
+	if body.Currency == "" {
+		details["currency"] = "required"
+	}
+	if len(details) > 0 {
+		presenter.WriteError(c, errors.NewValidationError("invalid payment request", details))
 		return
 	}
 
