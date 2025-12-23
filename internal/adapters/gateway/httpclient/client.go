@@ -228,10 +228,7 @@ func newCircuitBreaker(threshold int, cooldown time.Duration) *circuitBreaker {
 func (c *circuitBreaker) allow() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if time.Now().Before(c.openUntil) {
-		return false
-	}
-	return true
+	return !time.Now().Before(c.openUntil)
 }
 
 func (c *circuitBreaker) success() {
