@@ -118,6 +118,14 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 		return nil, err
 	}
 
+	createdEvent := &outbox.OutboxEvent{
+		ID:        s.idGen.New(),
+		EventType: "payment.created",
+		Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, tx.ID, tx.Status),
+		CreatedAt: s.clock.Now(),
+	}
+	_ = s.outboxRepo.CreateEvent(ctx, createdEvent)
+
 	// Llamar a gateway
 	status, err := s.gateway.ProcessPayment(ctx, p)
 	if err != nil {
@@ -145,10 +153,14 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 	s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, tx.Status)
 
 	// Crear evento outbox
+	eventType := "payment.failed"
+	if tx.Status == transaction.StatusApproved {
+		eventType = "payment.completed"
+	}
 	event := &outbox.OutboxEvent{
 		ID:        s.idGen.New(),
-		EventType: fmt.Sprintf("payment.%s", status),
-		Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, tx.ID, status),
+		EventType: eventType,
+		Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, tx.ID, tx.Status),
 		CreatedAt: s.clock.Now(),
 	}
 	s.outboxRepo.CreateEvent(ctx, event)
@@ -179,6 +191,14 @@ func (s *PaymentService) refundInternal(ctx context.Context, tx *transaction.Tra
 	s.paymentRepo.CreateTransaction(ctx, refundTx)
 	refundTx.UpdateStatus(transaction.StatusApproved)
 	s.paymentRepo.UpdateTransactionStatus(ctx, refundTx.ID, transaction.StatusApproved)
+
+	refundEvent := &outbox.OutboxEvent{
+		ID:        s.idGen.New(),
+		EventType: "refund.created",
+		Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, refundTx.ID, refundTx.Status),
+		CreatedAt: s.clock.Now(),
+	}
+	_ = s.outboxRepo.CreateEvent(ctx, refundEvent)
 	return nil
 }
 

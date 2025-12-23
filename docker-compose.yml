@@ -35,13 +35,41 @@ services:
       - rabbitmq
       - mock-gateway
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_NAME=draftea
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
-      - GATEWAY_URL=http://mock-gateway:8080
+      - CONFIG_FILE=/app/config/config.docker.yaml
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  relay:
+    build: .
+    command: go run cmd/relay/main.go
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - CONFIG_FILE=/app/config/config.docker.yaml
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  metrics-consumer:
+    build: .
+    command: go run cmd/consumer/main.go
+    depends_on:
+      - rabbitmq
+    environment:
+      - CONFIG_FILE=/app/config/config.docker.yaml
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  audit-consumer:
+    build: .
+    command: go run cmd/consumer/main.go
+    depends_on:
+      - rabbitmq
+    environment:
+      - CONFIG_FILE=/app/config/config.docker.yaml
     volumes:
       - .:/app
     working_dir: /app
