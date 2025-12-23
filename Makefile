@@ -1,5 +1,8 @@
 up:
-	docker compose up -d
+	docker compose up -d --build
+	echo "Migrating database..."
+	@sleep 5
+	make migrate
 
 down:
 	docker compose down
@@ -11,7 +14,23 @@ reset: down
 	make migrate
 
 migrate:
+	make migrate-up
+
+migrate-up:
 	docker compose run --rm migrate up
+
+migrate-down:
+	docker compose run --rm migrate down ${N:-1}
+
+migrate-version:
+	docker compose run --rm migrate version
+
+migrate-force:
+	@if [ -z "${V}" ]; then \
+		echo "V is required. Example: make migrate-force V=2"; \
+		exit 1; \
+	fi
+	docker compose run --rm migrate force ${V}
 
 test:
 	go test ./... -coverprofile=coverage.out

@@ -20,6 +20,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   mock-gateway:
     build: ./mock-gateway
@@ -35,44 +40,48 @@ services:
       - rabbitmq
       - mock-gateway
     environment:
-      - CONFIG_FILE=/app/config/config.docker.yaml
-    volumes:
-      - .:/app
-    working_dir: /app
+      - APP_ENV=docker
 
   relay:
     build: .
-    command: go run cmd/relay/main.go
+    command: ["/root/relay"]
     depends_on:
-      - postgres
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_started
     environment:
-      - CONFIG_FILE=/app/config/config.docker.yaml
-    volumes:
-      - .:/app
-    working_dir: /app
+      - APP_ENV=docker
+    restart: unless-stopped
 
   metrics-consumer:
     build: .
-    command: go run cmd/consumer/main.go
+    command: ["/root/consumer"]
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
-      - CONFIG_FILE=/app/config/config.docker.yaml
-    volumes:
-      - .:/app
-    working_dir: /app
+      - APP_ENV=docker
+    restart: unless-stopped
 
   audit-consumer:
     build: .
-    command: go run cmd/consumer/main.go
+    command: ["/root/consumer"]
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
-      - CONFIG_FILE=/app/config/config.docker.yaml
+      - APP_ENV=docker
+    restart: unless-stopped
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:v5.17.14
+    ports:
+      - "8082:8080"
     volumes:
-      - .:/app
-    working_dir: /app
+      - ./docs/openapi.yaml:/openapi.yaml:ro
+    environment:
+      - SWAGGER_JSON=/openapi.yaml
 
   migrate:
     image: migrate/migrate:v4.16.2

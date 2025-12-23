@@ -34,4 +34,16 @@ Configuration precedence is:
 Included files:
 - `config/config.local.yaml` for running locally.
 - `config/config.docker.yaml` for docker-compose.
-- Docker Compose sets `CONFIG_FILE=/app/config/config.docker.yaml` directly.
+- If `CONFIG_FILE` is not set, the app selects a default based on `APP_ENV`:
+  - `local` -> `config/config.local.yaml`
+  - `docker` -> `config/config.docker.yaml`
+  - `stage` -> `config/config.stage.yaml`
+  - `prod` -> `config/config.prod.yaml`
+
+## Test-Only Endpoints
+- `GET /healthz`
+- `POST /wallets/{user_id}/top-up`
+- `GET /wallets`
+
+## API Key (Test Only)
+If `app.api_key` is set, include the header `X-API-Key: <your-api-key>` on requests.

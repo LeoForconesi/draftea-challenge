@@ -83,6 +83,10 @@ The Makefile must provide these targets:
     - POST /wallets/{user_id}/payments (idempotent with Idempotency-Key)
     - GET  /wallets/{user_id}/balance
     - GET  /wallets/{user_id}/transactions (paginated)
+    - GET  /healthz (test-only)
+    - POST /wallets/{user_id}/top-up (test-only)
+    - GET  /wallets (paginated, test-only)
+    - POST /wallets (test-only)
 - PostgreSQL schema + SQL migrations (run by init container)
 - External mock payment gateway (HTTP server in docker-compose) with failure modes
 - Unit tests for critical usecases/services (aim ~80% where reasonable)
@@ -378,3 +382,20 @@ request_id, user_id, payment_id/transaction_id, currency, amount, provider_id, e
 - Do not introduce additional infrastructure components
 - Do not change API contracts or domain rules unless explicitly stated
 - Follow the described data model and flows strictly
+
+---
+
+## Test-Only Endpoints (Non-Production)
+These endpoints exist only to simplify local testing and visibility:
+- GET /healthz
+- POST /wallets/{user_id}/top-up
+- GET /wallets
+- POST /wallets
+
+Production note: Top-ups would be handled by a separate funding service and proper user/identity system.
+
+---
+
+## API Key (Test Only)
+- Use a static `X-API-Key` configured via `app.api_key`.
+- In production this would be replaced by proper authentication/authorization (OAuth/JWT, etc.).

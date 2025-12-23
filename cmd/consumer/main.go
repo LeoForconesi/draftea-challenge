@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"draftea-challenge/internal/adapters/messaging/rabbitmq"
 	"draftea-challenge/internal/platform/config"
@@ -44,13 +45,29 @@ func run() error {
 		PublishConfirmTimeout: cfg.Rabbit.PublishConfirmTimeout,
 	}
 
-	metricsConsumer, metricsCleanup, err := rabbitmq.NewConsumer(rabbitCfg, cfg.Rabbit.MetricsQueue, zapLogger)
+	metricsConsumer, metricsCleanup, err := connectConsumerWithRetry(
+		ctx,
+		rabbitCfg,
+		cfg.Rabbit.MetricsQueue,
+		zapLogger,
+		cfg.Rabbit.RelayMaxRetries,
+		cfg.Rabbit.RelayInitialBackoff,
+		cfg.Rabbit.RelayMaxBackoff,
+	)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = metricsCleanup() }()
 
-	auditConsumer, auditCleanup, err := rabbitmq.NewConsumer(rabbitCfg, cfg.Rabbit.AuditQueue, zapLogger)
+	auditConsumer, auditCleanup, err := connectConsumerWithRetry(
+		ctx,
+		rabbitCfg,
+		cfg.Rabbit.AuditQueue,
+		zapLogger,
+		cfg.Rabbit.RelayMaxRetries,
+		cfg.Rabbit.RelayInitialBackoff,
+		cfg.Rabbit.RelayMaxBackoff,
+	)
 	if err != nil {
 		return err
 	}
@@ -79,4 +96,50 @@ func run() error {
 	<-ctx.Done()
 	zapLogger.Info("consumers shutting down")
 	return nil
+}
+
+func connectConsumerWithRetry(
+	ctx context.Context,
+	cfg rabbitmq.Config,
+	queue string,
+	log *zap.Logger,
+	maxRetries int,
+	initialBackoff time.Duration,
+	maxBackoff time.Duration,
+) (*rabbitmq.Consumer, func() error, error) {
+	attempts := maxRetries + 1
+	if attempts <= 0 {
+		attempts = 1
+	}
+	backoff := initialBackoff
+	if backoff <= 0 {
+		backoff = 200 * time.Millisecond
+	}
+	if maxBackoff <= 0 {
+		maxBackoff = 2 * time.Second
+	}
+
+	var lastErr error
+	for i := 0; i < attempts; i++ {
+		consumer, cleanup, err := rabbitmq.NewConsumer(cfg, queue, log)
+		if err == nil {
+			return consumer, cleanup, nil
+		}
+		lastErr = err
+		log.Warn("rabbitmq consumer connect failed", zap.Error(err), zap.String("queue", queue))
+		if i == attempts-1 {
+			break
+		}
+		select {
+		case <-time.After(backoff):
+		case <-ctx.Done():
+			return nil, nil, ctx.Err()
+		}
+		next := backoff * 2
+		if next > maxBackoff {
+			next = maxBackoff
+		}
+		backoff = next
+	}
+	return nil, nil, lastErr
 }

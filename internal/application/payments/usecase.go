@@ -91,14 +91,7 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 	// Nota: Asumimos que el repo maneja transacciones; en implementación real, usar tx.Begin()
 	w, err := s.walletRepo.GetWallet(ctx, req.UserID)
 	if err != nil {
-		if isNotFoundError(err) {
-			w, _ = wallet.NewWallet(req.UserID)
-			if err := s.walletRepo.CreateWallet(ctx, w); err != nil {
-				return nil, err
-			}
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	// Debit (con lock implícito en repo)

@@ -27,6 +27,7 @@ type Type string
 const (
 	TypePayment Type = "PAYMENT"
 	TypeRefund  Type = "REFUND"
+	TypeTopUp   Type = "TOP_UP"
 )
 
 // Status define el estado de la transacción.
