@@ -133,8 +133,20 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 		if refundErr := s.refundInternal(ctx, tx, w); refundErr != nil {
 			// Log error, pero continuar
 		}
-		tx.UpdateStatus(transaction.StatusFailed)
-		s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, transaction.StatusFailed)
+		_ = tx.UpdateStatus(transaction.StatusFailed)
+		_ = s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, transaction.StatusFailed)
+
+		failedEvent := &outbox.OutboxEvent{
+			ID:        s.idGen.New(),
+			EventType: "payment.failed",
+			Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, tx.ID, tx.Status),
+			CreatedAt: s.clock.Now(),
+		}
+		_ = s.outboxRepo.CreateEvent(ctx, failedEvent)
+
+		if domErr, ok := err.(errors.Error); ok {
+			return nil, domErr
+		}
 		return nil, errors.NewGatewayError("gateway processing failed")
 	}
 
