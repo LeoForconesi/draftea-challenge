@@ -1,5 +1,16 @@
 # draftea-challenge
 
+Production-like wallet and payments API built with Go, Gin, PostgreSQL, and RabbitMQ.
+
+## Docs
+- [Architecture overview](docs/architecture/system-overview.md)
+- [Service design](docs/architecture/service-design.md)
+- [Database schema](docs/database/schema.md)
+- [Tech stack](docs/decisions/tech-stack.md)
+- [Error handling](docs/operations/error-handling.md)
+- [Runbook](docs/operations/runbook.md)
+- [OpenAPI spec](docs/openapi.yaml)
+
 ## Quickstart
 - `make up`
 - `make migrate`
@@ -11,11 +22,8 @@ Migrations use `golang-migrate` with versioned SQL files under `migrations/`:
 - Rollback: `docker compose run --rm migrate down 1`
 
 ## Docker Compose Flow
-- `make up` starts Postgres, RabbitMQ, mock gateway, and the API.
+- `make up` starts Postgres, RabbitMQ, mock gateway, API, relay, and consumers.
 - `make migrate` runs the migration container against the Postgres service.
-
-## OpenAPI
-- Spec: `docs/openapi.yaml`
 
 ## Configuration
 Configuration precedence is:
