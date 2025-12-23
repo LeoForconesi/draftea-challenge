@@ -210,8 +210,6 @@ Goal:
         - create REFUND transaction and restore balance (internal operation)
 5) Return API response.
 
-Note: For simplicity, keep synchronous. Mention in README that production may use Outbox + async processing, queues, retries, DLQ, etc.
-
 ---
 
 ## Async Events (RabbitMQ + Outbox)
@@ -365,6 +363,15 @@ request_id, user_id, payment_id/transaction_id, currency, amount, provider_id, e
     - declined
     - idempotency hit
 - Aim for ~80% coverage on critical application layer.
+
+---
+
+## Pending Requests (Next Steps)
+1) Add OpenAPI documentation.
+2) Provide a working config environment file and clarify config loading/precedence.
+3) Start unit testing.
+4) Add GitHub Actions: build, tests, coverage, lint, and vulnerability checks.
+5) After all steps, produce comprehensive documentation.
 
 ## Constraints for Implementation
 - Do not introduce new endpoints not listed in this document

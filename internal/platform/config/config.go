@@ -39,7 +39,16 @@ type DBConfig struct {
 
 // RabbitConfig defines RabbitMQ connection settings.
 type RabbitConfig struct {
-	URL string `mapstructure:"url"`
+	URL                   string        `mapstructure:"url"`
+	Exchange              string        `mapstructure:"exchange"`
+	MetricsQueue          string        `mapstructure:"metrics_queue"`
+	AuditQueue            string        `mapstructure:"audit_queue"`
+	PublishConfirmTimeout time.Duration `mapstructure:"publish_confirm_timeout"`
+	RelayBatchSize        int           `mapstructure:"relay_batch_size"`
+	RelayMaxInFlight      int           `mapstructure:"relay_max_in_flight"`
+	RelayMaxRetries       int           `mapstructure:"relay_max_retries"`
+	RelayInitialBackoff   time.Duration `mapstructure:"relay_initial_backoff"`
+	RelayMaxBackoff       time.Duration `mapstructure:"relay_max_backoff"`
 }
 
 // GatewayConfig defines external gateway settings.
@@ -78,6 +87,15 @@ func Load() (Config, error) {
 	v.SetDefault("db.name", "draftea")
 	v.SetDefault("db.sslmode", "disable")
 	v.SetDefault("rabbit.url", "amqp://guest:guest@localhost:5672/")
+	v.SetDefault("rabbit.exchange", "payments.events")
+	v.SetDefault("rabbit.metrics_queue", "metrics.queue")
+	v.SetDefault("rabbit.audit_queue", "audit.queue")
+	v.SetDefault("rabbit.publish_confirm_timeout", 2*time.Second)
+	v.SetDefault("rabbit.relay_batch_size", 100)
+	v.SetDefault("rabbit.relay_max_in_flight", 10)
+	v.SetDefault("rabbit.relay_max_retries", 3)
+	v.SetDefault("rabbit.relay_initial_backoff", 200*time.Millisecond)
+	v.SetDefault("rabbit.relay_max_backoff", 2*time.Second)
 	v.SetDefault("gateway.url", "http://localhost:8081")
 	v.SetDefault("gateway.timeout", 5*time.Second)
 	v.SetDefault("gateway.max_retries", 2)
@@ -133,7 +151,16 @@ type envConfig struct {
 		SSLMode  *string `envconfig:"DB_SSLMODE"`
 	}
 	Rabbit struct {
-		URL *string `envconfig:"RABBITMQ_URL"`
+		URL                   *string        `envconfig:"RABBITMQ_URL"`
+		Exchange              *string        `envconfig:"RABBITMQ_EXCHANGE"`
+		MetricsQueue          *string        `envconfig:"RABBITMQ_METRICS_QUEUE"`
+		AuditQueue            *string        `envconfig:"RABBITMQ_AUDIT_QUEUE"`
+		PublishConfirmTimeout *time.Duration `envconfig:"RABBITMQ_PUBLISH_CONFIRM_TIMEOUT"`
+		RelayBatchSize        *int           `envconfig:"RABBITMQ_RELAY_BATCH_SIZE"`
+		RelayMaxInFlight      *int           `envconfig:"RABBITMQ_RELAY_MAX_IN_FLIGHT"`
+		RelayMaxRetries       *int           `envconfig:"RABBITMQ_RELAY_MAX_RETRIES"`
+		RelayInitialBackoff   *time.Duration `envconfig:"RABBITMQ_RELAY_INITIAL_BACKOFF"`
+		RelayMaxBackoff       *time.Duration `envconfig:"RABBITMQ_RELAY_MAX_BACKOFF"`
 	}
 	Gateway struct {
 		URL                    *string        `envconfig:"GATEWAY_URL"`
@@ -189,6 +216,33 @@ func applyEnvOverrides(cfg *Config, env envConfig) {
 
 	if env.Rabbit.URL != nil {
 		cfg.Rabbit.URL = *env.Rabbit.URL
+	}
+	if env.Rabbit.Exchange != nil {
+		cfg.Rabbit.Exchange = *env.Rabbit.Exchange
+	}
+	if env.Rabbit.MetricsQueue != nil {
+		cfg.Rabbit.MetricsQueue = *env.Rabbit.MetricsQueue
+	}
+	if env.Rabbit.AuditQueue != nil {
+		cfg.Rabbit.AuditQueue = *env.Rabbit.AuditQueue
+	}
+	if env.Rabbit.PublishConfirmTimeout != nil {
+		cfg.Rabbit.PublishConfirmTimeout = *env.Rabbit.PublishConfirmTimeout
+	}
+	if env.Rabbit.RelayBatchSize != nil {
+		cfg.Rabbit.RelayBatchSize = *env.Rabbit.RelayBatchSize
+	}
+	if env.Rabbit.RelayMaxInFlight != nil {
+		cfg.Rabbit.RelayMaxInFlight = *env.Rabbit.RelayMaxInFlight
+	}
+	if env.Rabbit.RelayMaxRetries != nil {
+		cfg.Rabbit.RelayMaxRetries = *env.Rabbit.RelayMaxRetries
+	}
+	if env.Rabbit.RelayInitialBackoff != nil {
+		cfg.Rabbit.RelayInitialBackoff = *env.Rabbit.RelayInitialBackoff
+	}
+	if env.Rabbit.RelayMaxBackoff != nil {
+		cfg.Rabbit.RelayMaxBackoff = *env.Rabbit.RelayMaxBackoff
 	}
 
 	if env.Gateway.URL != nil {
