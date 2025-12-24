@@ -27,11 +27,6 @@ jobs:
 
       - name: Test
         run: |
-          go test ./... -coverprofile=coverage.out
-          go tool cover -func=coverage.out
-
-      - name: Test
-        run: |
           go test ./... -coverprofile=coverage.out -covermode=count
           go tool cover -func=coverage.out
 
