@@ -96,6 +96,7 @@ In production, use proper authN/authZ (e.g., OAuth2/JWT + user service).
 - Postman collection for easy API exploration.
 - Usage of IA for coding assistance and documentation.
 ---
+
 ## Some tools used in this project:
 - [Mermaid](https://mermaid-js.github.io/mermaid/#/) - for diagrams in documentation.
 - [Swagger UI](https://swagger.io/tools/swagger-ui/) - for interactive API docs.
