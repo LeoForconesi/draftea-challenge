@@ -1,0 +1,258 @@
+{
+	"info": {
+		"_postman_id": "ce3c43dd-4ad7-4c06-b237-17b8d0d5f333",
+		"name": "DrafteaChallenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9429039"
+	},
+	"item": [
+		{
+			"name": "HealthCheck",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{local}}8080/healthz",
+					"host": [
+						"{{local}}8080"
+					],
+					"path": [
+						"healthz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Wallets",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{local}}8080/wallets?limit=20&offset=0",
+					"host": [
+						"{{local}}8080"
+					],
+					"path": [
+						"wallets"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/wallets?limit=20&offset=0' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "Payment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Idempotency-Key",
+						"value": "leo"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "123123123123123123123"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"external_reference\": \"Leo user\",\n  \"amount\": 100,\n  \"currency\": \"ARS\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{local}}8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/payments",
+					"host": [
+						"{{local}}8080"
+					],
+					"path": [
+						"wallets",
+						"2d10b397-e0f3-4e61-9897-7e52bc2fda33",
+						"payments"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/payments' \\\n  -H 'accept: application/json' \\\n  -H 'Idempotency-Key: leo' \\\n  -H 'X-API-Key: 123123123123123123123' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"external_reference\": \"Leo user\",\n  \"amount\": 10,\n  \"currency\": \"ARS\"\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Wallet",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"2d10b397-e0f3-4e61-9897-7e52bc2fda33\",\n    \"name\": \"Leo\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/wallets",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \"http://localhost:8080/wallets\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"user_id\":\"<uuid>\",\"name\":\"alice\"}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Top Up Wallet",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 10000,\n    \"currency\": \"USD\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/wallets/:user-id/top-up",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets",
+						":user-id",
+						"top-up"
+					],
+					"variable": [
+						{
+							"key": "user-id",
+							"value": "2d10b397-e0f3-4e61-9897-7e52bc2fda33"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \"http://localhost:8080/wallets/<uuid>/top-up\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"amount\":10000,\"currency\":\"USD\"}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Balance",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/wallets/:user-id/balance",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets",
+						":user-id",
+						"balance"
+					],
+					"variable": [
+						{
+							"key": "user-id",
+							"value": "2d10b397-e0f3-4e61-9897-7e52bc2fda33"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/balance' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "Transactions",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/transactions?limit=20&offset=0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets",
+						"2d10b397-e0f3-4e61-9897-7e52bc2fda33",
+						"transactions"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/transactions?limit=20&offset=0' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		}
+	]
+}

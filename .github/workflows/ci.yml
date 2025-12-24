@@ -1,3 +1,4 @@
+# yaml
 name: ci
 
 on:
@@ -35,31 +36,35 @@ jobs:
         with:
           filename: coverage.out
 
-      # Este paso verifica si el badge o README cambió (la action genera coverage-badge.svg en la raíz)
       - name: Verify changed files
         id: verify
         uses: tj-actions/verify-changed-files@v20
         with:
-          files: README.md coverage-badge.svg
-            
-            # Solo corre si algo cambió
-            - name: Commit & Push updated badge and README
-              if: steps.verify.outputs.files_changed == 'true'
-              run: |
-                git config --global user.email "github-actions[bot]@users.noreply.github.com"
-                git config --global user.name "github-actions[bot]"
-                
-                # Importante: checkout al branch correcto (no detached)
-                git checkout ${{ github.head_ref || github.ref_name }}
-                
-                git add README.md coverage-badge.svg
-                git commit -m "chore: Update coverage badge [ci skip]"
-                git push origin HEAD:${{ github.ref_name }}
+          files: README.md
+
+      - name: Commit & Push updated badge and README
+        if: steps.verify.outputs.files_changed == 'true'
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          git branch -f ${{ github.head_ref }} HEAD
+          git checkout ${{ github.head_ref }}
+
+          if [ ! -f coverage-badge.svg ]; then
+            echo "SVG not found, skipping commit"
+            exit 0
+          fi
+
+          git add README.md coverage-badge.svg
+  
+          git commit -m "chore: Update coverage badge [ci skip]" || echo "No changes to commit"
+
+          git push origin ${{ github.head_ref }} --force-with-lease
 
       - name: Lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.55.2
           args: --timeout=5m
 
       - name: Vulnerability check

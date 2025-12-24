@@ -7,7 +7,8 @@ app = Flask(__name__)
 @app.route('/pay', methods=['POST'])
 def pay():
     data = request.json
-    mode = data.get('mode', 'happy')
+    #chamge this mode to test different scenarios
+    mode = data.get('mode', 'random')
     
     if mode == 'timeout':
         time.sleep(10)  # Simulate timeout
@@ -21,7 +22,8 @@ def pay():
         return jsonify({"status": "approved"}), 200
     elif mode == 'random':
         outcomes = ['approved', 'declined', 'error', 'timeout']
-        status = random.choice(outcomes)
+        weights = [0.6, 0.15, 0.15, 0.1] # Adjust probabilities as needed
+        status = random.choices(outcomes, weights=weights, k=1)[0]
         if status == 'timeout':
             time.sleep(10)
             return jsonify({"status": status}), 504
