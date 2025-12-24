@@ -35,22 +35,28 @@ jobs:
         uses: tj-actions/coverage-badge-go@v3
         id: coverage
         with:
-          filename: coverage.out  # El archivo que ya generás
+          filename: coverage.out
 
-      - name: Verify if README changed
-        uses: tj-actions/verify-changed-files@v20
+      # Este paso verifica si el badge o README cambió (la action genera coverage-badge.svg en la raíz)
+      - name: Verify changed files
         id: verify
+        uses: tj-actions/verify-changed-files@v20
         with:
-          files: README.md
-
-      - name: Commit & Push updated README with badge
-        if: steps.verify.outputs.files_changed == 'true'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add README.md
-          git commit -m "chore: Update coverage badge"
-          git push
+          files: README.md coverage-badge.svg
+            
+            # Solo corre si algo cambió
+            - name: Commit & Push updated badge and README
+              if: steps.verify.outputs.files_changed == 'true'
+              run: |
+                git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                git config --global user.name "github-actions[bot]"
+                
+                # Importante: checkout al branch correcto (no detached)
+                git checkout ${{ github.head_ref || github.ref_name }}
+                
+                git add README.md coverage-badge.svg
+                git commit -m "chore: Update coverage badge [ci skip]"
+                git push origin HEAD:${{ github.ref_name }}
 
       - name: Lint
         uses: golangci/golangci-lint-action@v6
