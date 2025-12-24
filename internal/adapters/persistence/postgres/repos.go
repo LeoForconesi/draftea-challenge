@@ -159,8 +159,16 @@ func (p *PostgresPersistence) ListWallets(ctx context.Context, limit, offset int
 
 // PaymentRepository & IdempotencyRepo & Outbox
 func (p *PostgresPersistence) CreateTransaction(ctx context.Context, txDomain *domaintx.Transaction) error {
+	var walletRow WalletModel
+	if err := p.db.WithContext(ctx).Where("user_id = ?", txDomain.UserID.String()).First(&walletRow).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domainerrors.NewNotFoundError("wallet not found")
+		}
+		return err
+	}
 	m := TransactionModel{
 		ID:                txDomain.ID.String(),
+		WalletID:          walletRow.ID,
 		UserID:            txDomain.UserID.String(),
 		Type:              string(txDomain.Type),
 		Amount:            txDomain.Amount,

@@ -25,6 +25,7 @@ type WalletBalanceModel struct {
 
 type TransactionModel struct {
 	ID                string `gorm:"primaryKey;type:varchar(36)"`
+	WalletID          string `gorm:"type:varchar(36);index"`
 	UserID            string `gorm:"type:varchar(36);index"`
 	Type              string `gorm:"type:varchar(32)"`
 	Amount            int64
