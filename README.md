@@ -1,5 +1,7 @@
 # draftea-challenge
 
+![Coverage](coverage-badge.svg)
+
 Production-like wallet and payments API built with Go, Gin, PostgreSQL, and RabbitMQ.
 
 ## Docs
