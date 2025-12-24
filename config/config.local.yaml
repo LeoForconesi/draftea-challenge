@@ -38,3 +38,5 @@ gateway:
 logger:
   level: "info"
   development: true
+
+#X-API-Key: 123123123123123123123 #only if you want to test auth middleware this is static and not checking against any provider

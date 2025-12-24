@@ -1,5 +1,8 @@
 # Database Schema
 
+## Relation diagram
+![database schema](docs/database/Db-relation-diagram.svg)
+
 ## Tables
 ### wallets
 - id (varchar(36), PK)

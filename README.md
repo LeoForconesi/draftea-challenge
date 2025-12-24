@@ -3,6 +3,19 @@
 ![Coverage](coverage-badge.svg)
 
 Production-like wallet and payments API built with Go, Gin, PostgreSQL, and RabbitMQ.
+## Considerations
+- You'll need Docker and Docker Compose installed and running in your local environment.
+- By default this service will launch in docker. You can change this by setting the `APP_ENV` environment variable to `local` to run outside of docker.
+This is useful for debugging or development.
+- You can find configuration files under the `config/` directory. As said in the previous point, by default it will use `config.docker.yaml` when running in docker and `config.local.yaml` when running locally.
+- Once you run the application with make up you can find the following services available:
+  - Swagger Ui is available at [http://localhost:8080/docs/index.html](http://localhost:8080/docs/index.html).
+  - You can access the mock payment gateway at [http://localhost:8081](http://localhost:8081).
+  - RabbitMQ management UI is available at [http://localhost:15672](http://localhost:15672)
+  - The API is exposed at [http://localhost:8080](http://localhost:8080).
+- A full Postman collection is provided in [`/postman/collections`](postman/collections/DrafteaChallenge.postman_collection.json) you can import this Json into your postman or REST Client of choice to explore the endpoints.
+- 
+
 
 ## Docs
 - [Architecture overview](docs/architecture/system-overview.md)
@@ -43,10 +56,12 @@ Included files:
   - `prod` -> `config/config.prod.yaml`
 
 ## Test-Only Endpoints
-- `GET /healthz`
-- `POST /wallets/{user_id}/top-up`
-- `GET /wallets`
+I've created some test-only endpoints to facilitate local testing and visibility:
+- `GET /healthz` : health check. Returns 200 OK if the service is healthy.
+- `POST /wallets/{user_id}/top-up` : adds balance to a wallet for testing purposes.
+- `GET /wallets`: Lists wallets and balances (paginated), useful for testing if you don't want to access the DB directly.
 
 ## API Key (Test Only)
-If `app.api_key` is set, include the header `X-API-Key: <your-api-key>` on requests.
+If `app.api_key` is set, include the header `X-API-Key: <your-api-key>` on requests. app.api_key is only set in local and docker configs for testing convenience.
+In production, use proper authN/authZ (e.g., OAuth2/JWT + user service).
 
