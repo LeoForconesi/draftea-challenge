@@ -54,6 +54,7 @@ func run() error {
 		cfg.Rabbit.RelayInitialBackoff,
 		cfg.Rabbit.RelayMaxBackoff,
 	)
+
 	if err != nil {
 		return err
 	}

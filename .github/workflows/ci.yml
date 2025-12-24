@@ -42,25 +42,31 @@ jobs:
         with:
           files: README.md
 
-      - name: Commit & Push updated badge and README
-        if: steps.verify.outputs.files_changed == 'true'
+      - name: Generate Coverage Badge
+        uses: tj-actions/coverage-badge-go@v3
+        with:
+          filename: coverage.out
+          badge_path: coverage-badge.svg  # Nombre explícito
+
+      - name: Commit & Push coverage badge
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
+          
           git branch -f ${{ github.head_ref }} HEAD
           git checkout ${{ github.head_ref }}
-
-          if [ ! -f coverage-badge.svg ]; then
-            echo "SVG not found, skipping commit"
-            exit 0
+          
+          # Verificamos si el SVG existe
+          if [ -f coverage-badge.svg ]; then
+            echo "SVG generated successfully"
+            git add coverage-badge.svg README.md
+            git commit -m "chore: Update coverage badge [ci skip]" || echo "No changes"
+            git push origin ${{ github.head_ref }} --force-with-lease
+          else
+            echo "ERROR: coverage-badge.svg not generated!"
+            ls -la  # Para debug: muestra archivos en raíz
+            exit 1
           fi
-
-          git add README.md coverage-badge.svg
-  
-          git commit -m "chore: Update coverage badge [ci skip]" || echo "No changes to commit"
-
-          git push origin ${{ github.head_ref }} --force-with-lease
 
       - name: Lint
         uses: golangci/golangci-lint-action@v6
