@@ -47,13 +47,14 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
-          # Important: checkout to the correct branch (not detached)
-          git checkout ${{ github.head_ref || github.ref_name }}
-
+          
+          git branch -f ${{ github.head_ref }} HEAD
+          git checkout ${{ github.head_ref }}
+          
           git add README.md coverage-badge.svg
           git commit -m "chore: Update coverage badge [ci skip]" || echo "No changes to commit"
-          git push origin HEAD:${{ github.ref_name }}
+          
+          git push origin ${{ github.head_ref }} --force-with-lease
 
       - name: Lint
         uses: golangci/golangci-lint-action@v6
