@@ -1,0 +1,5 @@
+- Outbox pattern articles:
+  - [Reliable event dispatching using a transactional outbox](https://blog.frankdejonge.nl/reliable-event-dispatching-using-a-transactional-outbox/)
+- DDD and Hexagonal Architecture articles:
+  - [DDD, Hexagonal, Onion, Clean, CQRS, … How I put it all together](https://herbertograca.com/ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/)
+  - [Domain-Driven Design (DDD) and Hexagonal Architecture in Java](https://vaadin.com/blog/ddd-part-3-domain-driven-design-and-the-hexagonal-architecture)

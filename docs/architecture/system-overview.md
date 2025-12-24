@@ -1,7 +1,7 @@
 # System Overview
 ↩️ [Return to README](../../README.md)
 ## High-Level Architecture
-![high-level Architecture](docs/architecture/High-level-diagram.svg)
+![high-level Architecture](docs/resources/High-level-diagram.svg)
 <details>
 <summary>Mermaid Code</summary>
 
@@ -22,7 +22,7 @@ flowchart LR
 
 
 ## Request Flow (Payment)
-![request flow](docs/architecture/Request Flow.svg)
+![request flow](docs/resources/Request Flow.svg)
 
 <details>
 <summary>Mermaid Code</summary>
@@ -50,7 +50,7 @@ R->>MQ: publish event
 
 
 ## Layers (Clean/Hexagonal)
-![layers](docs/architecture/Layers(clean-hexagonal).svg)
+![layers](docs/resources/Layers(clean-hexagonal).svg)
 
 <details>
 <summary>Mermaid Code</summary>
@@ -75,3 +75,11 @@ flowchart TB
 ## External Integrations
 - Mock Payment Gateway via HTTP
 - RabbitMQ for async domain events (outbox relay)
+
+## Mock Payment Gateway (pasarela)
+- Simulates payment processing with random delays/failures, but a interesting case to take into consideration is that
+we handle retries with exponential backoff and circuit breaker pattern to avoid overwhelming the gateway during downtimes.
+- Check this improvement that could be applied here.: [docs/improvements/gateway-resilience.md](docs/improvements/gateway-resilience.md).
+The issue is if the gateway is down for a long period of time, the retries could take a long time to recover and the 
+circuit breaker could be open for a long time as well, causing a bad user experience. 
+A possible solution is to implement a fallback mechanism that could be used when the gateway is down for a long period of time.

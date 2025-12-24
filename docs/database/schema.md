@@ -2,7 +2,7 @@
 ↩️ [Return to README](../../README.md)
 
 ## Relation diagram
-![database schema](docs/database/Db-relation-diagram.svg)
+![database schema](docs/resources/Db-relation-diagram.svg)
 
 ## Tables
 ### wallets
