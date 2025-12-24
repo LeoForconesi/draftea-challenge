@@ -124,10 +124,14 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 	if err != nil {
 		// Gateway error: refund interno
 		if refundErr := s.refundInternal(ctx, tx, w); refundErr != nil {
-			// Log error, pero continuar
+			return nil, errors.NewInternalError("refund failed")
 		}
-		_ = tx.UpdateStatus(transaction.StatusFailed)
-		_ = s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, transaction.StatusFailed)
+		if err := tx.UpdateStatus(transaction.StatusFailed); err != nil {
+			return nil, err
+		}
+		if err := s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, transaction.StatusFailed); err != nil {
+			return nil, err
+		}
 
 		failedEvent := &outbox.OutboxEvent{
 			ID:        s.idGen.New(),
@@ -135,7 +139,9 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 			Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, tx.ID, tx.Status),
 			CreatedAt: s.clock.Now(),
 		}
-		_ = s.outboxRepo.CreateEvent(ctx, failedEvent)
+		if err := s.outboxRepo.CreateEvent(ctx, failedEvent); err != nil {
+			return nil, err
+		}
 
 		if domErr, ok := err.(errors.Error); ok {
 			return nil, domErr
@@ -146,16 +152,28 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 	// Finalizar basado en status
 	switch status {
 	case "approved":
-		tx.UpdateStatus(transaction.StatusApproved)
+		if err := tx.UpdateStatus(transaction.StatusApproved); err != nil {
+			return nil, err
+		}
 	case "declined":
-		tx.UpdateStatus(transaction.StatusDeclined)
+		if err := tx.UpdateStatus(transaction.StatusDeclined); err != nil {
+			return nil, err
+		}
 		// Refund
-		s.refundInternal(ctx, tx, w)
+		if err := s.refundInternal(ctx, tx, w); err != nil {
+			return nil, errors.NewInternalError("refund failed")
+		}
 	default:
-		tx.UpdateStatus(transaction.StatusFailed)
-		s.refundInternal(ctx, tx, w)
+		if err := tx.UpdateStatus(transaction.StatusFailed); err != nil {
+			return nil, err
+		}
+		if err := s.refundInternal(ctx, tx, w); err != nil {
+			return nil, errors.NewInternalError("refund failed")
+		}
 	}
-	s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, tx.Status)
+	if err := s.paymentRepo.UpdateTransactionStatus(ctx, tx.ID, tx.Status); err != nil {
+		return nil, err
+	}
 
 	// Crear evento outbox
 	eventType := "payment.failed"
@@ -168,7 +186,9 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 		Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, tx.ID, tx.Status),
 		CreatedAt: s.clock.Now(),
 	}
-	s.outboxRepo.CreateEvent(ctx, event)
+	if err := s.outboxRepo.CreateEvent(ctx, event); err != nil {
+		return nil, err
+	}
 
 	// Guardar idempotencia
 	resp := &ProcessPaymentResponse{
@@ -183,19 +203,31 @@ func (s *PaymentService) ProcessPayment(ctx context.Context, req *ProcessPayment
 		Response:  string(respJSON),
 		CreatedAt: s.clock.Now(),
 	}
-	s.idempotencyRepo.CreateIdempotencyRecord(ctx, record)
+	if err := s.idempotencyRepo.CreateIdempotencyRecord(ctx, record); err != nil {
+		return nil, err
+	}
 
 	return resp, nil
 }
 
 // refundInternal realiza un reembolso interno.
 func (s *PaymentService) refundInternal(ctx context.Context, tx *transaction.Transaction, w *wallet.Wallet) error {
-	w.Credit(tx.Currency, tx.Amount)
-	s.walletRepo.UpdateBalance(ctx, tx.UserID, tx.Currency, w.GetBalance(tx.Currency))
+	if err := w.Credit(tx.Currency, tx.Amount); err != nil {
+		return err
+	}
+	if err := s.walletRepo.UpdateBalance(ctx, tx.UserID, tx.Currency, w.GetBalance(tx.Currency)); err != nil {
+		return err
+	}
 	refundTx, _ := transaction.NewTransaction(tx.UserID, transaction.TypeRefund, tx.Amount, tx.Currency, tx.ProviderID, tx.ExternalReference)
-	s.paymentRepo.CreateTransaction(ctx, refundTx)
-	refundTx.UpdateStatus(transaction.StatusApproved)
-	s.paymentRepo.UpdateTransactionStatus(ctx, refundTx.ID, transaction.StatusApproved)
+	if err := s.paymentRepo.CreateTransaction(ctx, refundTx); err != nil {
+		return err
+	}
+	if err := refundTx.UpdateStatus(transaction.StatusApproved); err != nil {
+		return err
+	}
+	if err := s.paymentRepo.UpdateTransactionStatus(ctx, refundTx.ID, transaction.StatusApproved); err != nil {
+		return err
+	}
 
 	refundEvent := &outbox.OutboxEvent{
 		ID:        s.idGen.New(),
@@ -203,7 +235,9 @@ func (s *PaymentService) refundInternal(ctx context.Context, tx *transaction.Tra
 		Payload:   fmt.Sprintf(`{"transaction_id":"%s","status":"%s"}`, refundTx.ID, refundTx.Status),
 		CreatedAt: s.clock.Now(),
 	}
-	_ = s.outboxRepo.CreateEvent(ctx, refundEvent)
+	if err := s.outboxRepo.CreateEvent(ctx, refundEvent); err != nil {
+		return err
+	}
 	return nil
 }
 

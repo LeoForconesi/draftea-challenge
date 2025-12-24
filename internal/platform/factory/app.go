@@ -2,7 +2,7 @@ package factory
 
 import (
 	"draftea-challenge/internal/adapters/gateway/httpclient"
-	"draftea-challenge/internal/adapters/http"
+	httpapi "draftea-challenge/internal/adapters/http"
 	"draftea-challenge/internal/adapters/http/handlers"
 	"draftea-challenge/internal/adapters/persistence/postgres"
 	"draftea-challenge/internal/application/payments"
