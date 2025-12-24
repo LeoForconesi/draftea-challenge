@@ -22,6 +22,7 @@ Or maybe create table views optimized for mobile usage, or web.
 - Security Enhancements: Additional security measures such as encryption at rest, enhanced logging, and monitoring are not fully implemented. We can add security for internal communication among other services using api keys.
 - Secret Vaults: Integration with secret management solutions (e.g., AWS Secrets Manager, HashiCorp Vault) for managing sensitive configuration data is not included.
 - CI/CD Pipeline: A complete continuous integration and continuous deployment (CI/CD) pipeline for automated, current workflow only checks builds, tests, linting and vulnerabilities.
+- Another way of improve the CI/CD could be to sepparate each action from the workflow, so when a PR is created, only the necessary actions are run instead of all of them. And if only one fails, we can re-run only that one instead of the whole workflow.
 - Consider some IAAS deployment options like Terraform or CloudFormation templates for easier infrastructure management.
 - We could separate Dockerfiles for each service (API, workers, relay, mock gateway) for better modularity and independent scaling.
  

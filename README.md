@@ -106,6 +106,9 @@ In production, use proper authN/authZ (e.g., OAuth2/JWT + user service).
 - [GoLand](https://www.jetbrains.com/go/) - as the main IDE for development.
 - [Docker](https://www.docker.com/) - for containerization and local environment setup.
 - [DBeaver](https://dbeaver.io/) - for database management and querying locally.
+- [CodeQL](https://codeql.github.com/) - for static code analysis and security checks.
+- [govulncheck](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck) - for vulnerability scanning of Go dependencies.
+- [GitHub Actions](https://github.com/features/actions) - for CI/CD workflows.
 ---
 
 ## Contact
