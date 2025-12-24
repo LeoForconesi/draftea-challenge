@@ -50,15 +50,14 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
+          
           git branch -f ${{ github.head_ref }} HEAD
           git checkout ${{ github.head_ref }}
 
           git add README.md
           git commit -m "chore: Update coverage badge [ci skip]" || echo "No changes to commit"
 
-          gh auth status  # Para debug: muestra que está autenticado con tu PAT
-          gh repo set-default ${{ github.repository }}
+          git remote set-url origin https://x-access-token:${PAT}@github.com/${{ github.repository }}.git
           git push origin ${{ github.head_ref }} --force-with-lease
 
       - name: Lint
