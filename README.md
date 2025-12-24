@@ -13,11 +13,11 @@ This is useful for debugging or development.
   - You can access the mock payment gateway at [http://localhost:8081](http://localhost:8081).
   - RabbitMQ management UI is available at [http://localhost:15672](http://localhost:15672)
   - The API is exposed at [http://localhost:8080](http://localhost:8080).
-- A full Postman collection is provided in [`/postman/collections`](postman/collections/DrafteaChallenge.postman_collection.json) you can import this Json into your postman or REST Client of choice to explore the endpoints.
-- 
-
+- A full Postman collection is provided in [`/postman/collections`](postman/collections/DrafteaChallenge.postman_collection.json) you can import this Json into your postman or REST Client of choice to explore the endpoints. Take into consideration that {{$guid}} from postman is used for UUID generation in requests, and for idempotency keys, you can replace this to any UUID generator of your choice or manually create one. In the same folter you can find environment variables that will help you set up the requests.
+- This app implementation uses idempotency key in order to avoid duplicate processing of requests. The key must be provided in the `Idempotency-Key` header for endpoints that support it (e.g., payment processing). The service will return the same response for requests with the same idempotency key. So if you want to create a new payment, make sure to use a different key each time. If you use the postman collection provided, this is handled automatically, but it's nice to take this into consideration if you want to test duplication handling.
 
 ## Docs
+- [Challenge description](docs/challenge.md)
 - [Architecture overview](docs/architecture/system-overview.md)
 - [Service design](docs/architecture/service-design.md)
 - [Database schema](docs/database/schema.md)
@@ -37,7 +37,7 @@ Migrations use `golang-migrate` with versioned SQL files under `migrations/`:
 - Rollback: `docker compose run --rm migrate down 1`
 
 ## Docker Compose Flow
-- `make up` starts Postgres, RabbitMQ, mock gateway, API, relay, and consumers.
+- `make up` starts Postgres, RabbitMQ, mock gateway, API, relay, and consumers, and then will run migrations.
 - `make migrate` runs the migration container against the Postgres service.
 
 ## Configuration

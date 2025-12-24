@@ -1,5 +1,5 @@
 # Tech Stack
-
+↩️ [Return to README](../../README.md)
 ## Language
 - Go 1.24.11: simple concurrency, strong tooling, and performance.
 

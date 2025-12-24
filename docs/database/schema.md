@@ -1,4 +1,5 @@
 # Database Schema
+↩️ [Return to README](../../README.md)
 
 ## Relation diagram
 ![database schema](docs/database/Db-relation-diagram.svg)

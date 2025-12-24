@@ -2,6 +2,7 @@
   "info": {
     "_postman_id": "ce3c43dd-4ad7-4c06-b237-17b8d0d5f333",
     "name": "DrafteaChallenge",
+    "description": "A simple Wallet application, that handles Balance and a history of Transactions of a specific userId.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -18,16 +19,64 @@
           }
         ],
         "url": {
-          "raw": "{{local}}8080/healthz",
+          "raw": "{{local}}/healthz",
           "host": [
-            "{{local}}8080"
+            "{{local}}"
           ],
           "path": [
             "healthz"
           ]
         }
       },
-      "response": []
+      "response": [
+        {
+          "id": "de5302ec-3eb6-40cd-8c01-b8c95db815f6",
+          "name": "HealthCheck",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{local}}/healthz",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "healthz"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "282b7c49-aac4-4c61-8b15-6a8b283c5e51"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 15:57:23 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "15"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T15:57:25.365Z",
+          "body": "{\n    \"status\": \"ok\"\n}"
+        }
+      ]
     },
     {
       "name": "Wallets",
@@ -41,9 +90,9 @@
           }
         ],
         "url": {
-          "raw": "{{local}}8080/wallets?limit=20&offset=0",
+          "raw": "{{local}}/wallets?limit=20&offset=0",
           "host": [
-            "{{local}}8080"
+            "{{local}}"
           ],
           "path": [
             "wallets"
@@ -51,17 +100,78 @@
           "query": [
             {
               "key": "limit",
-              "value": "20"
+              "value": "20",
+              "uuid": "e6215d11-bd87-4b2b-8812-ef56a5fd71f4"
             },
             {
               "key": "offset",
-              "value": "0"
+              "value": "0",
+              "uuid": "ffc0d423-dbb2-42c2-b253-ea89ae294754"
             }
           ]
         },
-        "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/wallets?limit=20&offset=0' \\\n  -H 'accept: application/json'"
+        "description": "Obtains a paginated list of wallets. This is useful to obtain walletId or userId for the rest of the operations.\n\nGenerated from cURL: curl -X 'GET'  \n'[http://localhost:8080/wallets?limit=20&amp;offset=0'](http://localhost:8080/wallets?limit=20&offset=0')  \n\\-H 'accept: application/json'"
       },
-      "response": []
+      "response": [
+        {
+          "id": "7c3fa3ba-5166-463c-aff8-cb53fc8cddf1",
+          "name": "Wallets",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{local}}/wallets?limit=20&offset=0",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "wallets"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "uuid": "e6215d11-bd87-4b2b-8812-ef56a5fd71f4"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "uuid": "ffc0d423-dbb2-42c2-b253-ea89ae294754"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "9a4bb62c-dc64-4491-92f3-b26cac6129d5"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 15:58:19 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "253"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T16:07:13.084Z",
+          "body": "{\n    \"wallets\": [\n        {\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"balances\": {\n                \"MXN\": 250000,\n                \"USD\": 99800\n            }\n        },\n        {\n            \"user_id\": \"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb\",\n            \"balances\": {\n                \"USD\": 50000\n            }\n        },\n        {\n            \"user_id\": \"ba31aaee-b9dd-47f5-9ed1-56193b6cdbcb\",\n            \"balances\": {}\n        }\n    ],\n    \"total\": 3\n}"
+        }
+      ]
     },
     {
       "name": "Payment",
@@ -75,7 +185,7 @@
           },
           {
             "key": "Idempotency-Key",
-            "value": "leo"
+            "value": "{{$guid}}"
           },
           {
             "key": "X-API-Key",
@@ -88,7 +198,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"external_reference\": \"Leo user\",\n  \"amount\": 100,\n  \"currency\": \"ARS\"\n}",
+          "raw": "{\n  \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"external_reference\": \"Leo user\",\n  \"amount\": 100,\n  \"currency\": \"USD\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -96,19 +206,103 @@
           }
         },
         "url": {
-          "raw": "{{local}}8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/payments",
+          "raw": "{{local}}/wallets/:userId/payments",
           "host": [
-            "{{local}}8080"
+            "{{local}}"
           ],
           "path": [
             "wallets",
-            "2d10b397-e0f3-4e61-9897-7e52bc2fda33",
+            ":userId",
             "payments"
+          ],
+          "variable": [
+            {
+              "key": "userId",
+              "value": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+              "uuid": "66c609fa-4c48-4aac-a2db-68238bfde07a"
+            }
           ]
         },
         "description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/payments' \\\n  -H 'accept: application/json' \\\n  -H 'Idempotency-Key: leo' \\\n  -H 'X-API-Key: 123123123123123123123' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"external_reference\": \"Leo user\",\n  \"amount\": 10,\n  \"currency\": \"ARS\"\n}'"
       },
-      "response": []
+      "response": [
+        {
+          "id": "8d1f3ea5-0397-47e3-8e9b-ef9f7fa0975c",
+          "name": "Payment",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "123123123123123123123"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"external_reference\": \"Leo user\",\n  \"amount\": 100,\n  \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local}}/wallets/:userId/payments",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "wallets",
+                ":userId",
+                "payments"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                  "uuid": "66c609fa-4c48-4aac-a2db-68238bfde07a"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "09a67d75-d867-4a5a-977d-7800b7492acd"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 16:08:33 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "77"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T16:08:35.509Z",
+          "body": "{\n    \"transaction_id\": \"73ba857a-5da9-4baf-8e4c-35ad1a21ee6b\",\n    \"status\": \"APPROVED\"\n}"
+        }
+      ]
     },
     {
       "name": "Create Wallet",
@@ -123,7 +317,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"user_id\": \"2d10b397-e0f3-4e61-9897-7e52bc2fda33\",\n    \"name\": \"Leo\"\n}",
+          "raw": "{\n    \"user_id\": \"{{$guid}}\",\n    \"name\": \"Leo\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -131,19 +325,73 @@
           }
         },
         "url": {
-          "raw": "http://localhost:8080/wallets",
-          "protocol": "http",
+          "raw": "{{local}}/wallets",
           "host": [
-            "localhost"
+            "{{local}}"
           ],
-          "port": "8080",
           "path": [
             "wallets"
           ]
         },
-        "description": "Generated from cURL: curl -X POST \"http://localhost:8080/wallets\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"user_id\":\"<uuid>\",\"name\":\"alice\"}'"
+        "description": "Creates a new Wallet. This endpoints is created in order to simplify testability and usage of the rest of the operations. The name parameter is optional.\n\nThis request uses `{{$guid}}` a Postman functionality that creates a UUID v4\n\nGenerated from cURL: curl -X POST \"[http://localhost:8080/wallets\"](http://localhost:8080/wallets)  \n\\-H \"Content-Type: application/json\"  \n\\-d '{\"user_id\":\"\",\"name\":\"alice\"}'"
       },
-      "response": []
+      "response": [
+        {
+          "id": "999fe3f8-7418-4e91-80bb-853ab15aa699",
+          "name": "Create Wallet",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": \"{{$guid}}\",\n    \"name\": \"Einstein\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local}}/wallets",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "wallets"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "8a574255-214d-471c-9081-234561827136"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 16:08:47 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "68"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T16:08:49.090Z",
+          "body": "{\n    \"user_id\": \"082b8234-b1e6-42e1-898b-730ade28c7a7\",\n    \"name\": \"Einstein\"\n}"
+        }
+      ]
     },
     {
       "name": "Top Up Wallet",
@@ -166,27 +414,91 @@
           }
         },
         "url": {
-          "raw": "http://localhost:8080/wallets/:user-id/top-up",
-          "protocol": "http",
+          "raw": "{{local}}/wallets/:userId/top-up",
           "host": [
-            "localhost"
+            "{{local}}"
           ],
-          "port": "8080",
           "path": [
             "wallets",
-            ":user-id",
+            ":userId",
             "top-up"
           ],
           "variable": [
             {
-              "key": "user-id",
-              "value": "2d10b397-e0f3-4e61-9897-7e52bc2fda33"
+              "key": "userId",
+              "value": "{{user1}}",
+              "uuid": "d6f39260-0adc-4865-95b0-b4a4cdc17e12"
             }
           ]
         },
-        "description": "Generated from cURL: curl -X POST \"http://localhost:8080/wallets/<uuid>/top-up\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"amount\":10000,\"currency\":\"USD\"}'"
+        "description": "This endpoint will add money to a wallet. Since we need to make payments, we need to have a positive balance in order to proceed with operations. Again this is added quickly in order to improve testability of the operations.\n\nGenerated from cURL: curl -X POST \"[http://localhost:8080/wallets/](http://localhost:8080/wallets/)/top-up\"  \n\\-H \"Content-Type: application/json\"  \n\\-d '{\"amount\":10000,\"currency\":\"USD\"}'"
       },
-      "response": []
+      "response": [
+        {
+          "id": "0348f197-cc9b-46ee-aab0-0593fdec0330",
+          "name": "Top Up Wallet",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 10000,\n    \"currency\": \"USD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{local}}/wallets/:userId/top-up",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "wallets",
+                ":userId",
+                "top-up"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{user1}}",
+                  "uuid": "d6f39260-0adc-4865-95b0-b4a4cdc17e12"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "8f5aa19c-15f9-4218-8fbe-0c5f43a7d894"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 16:08:57 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "74"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T16:08:59.891Z",
+          "body": "{\n    \"transaction_id\": \"f14ae620-dae3-49ee-adf8-82cd4ca07404\",\n    \"balance\": 119600\n}"
+        }
+      ]
     },
     {
       "name": "Balance",
@@ -200,27 +512,82 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/wallets/:user-id/balance",
-          "protocol": "http",
+          "raw": "{{local}}/wallets/:userId/balance",
           "host": [
-            "localhost"
+            "{{local}}"
           ],
-          "port": "8080",
           "path": [
             "wallets",
-            ":user-id",
+            ":userId",
             "balance"
           ],
           "variable": [
             {
-              "key": "user-id",
-              "value": "2d10b397-e0f3-4e61-9897-7e52bc2fda33"
+              "key": "userId",
+              "value": "{{user1}}",
+              "uuid": "ec70c2c3-e0f8-43d3-b03d-7b2f5291dc01"
             }
           ]
         },
-        "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/balance' \\\n  -H 'accept: application/json'"
+        "description": "Obtains the Balance of a specific user id.\n\nGenerated from cURL: curl -X 'GET'  \n'[http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/balance'](http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/balance')  \n\\-H 'accept: application/json'"
       },
-      "response": []
+      "response": [
+        {
+          "id": "f6f7490b-ce6a-4195-87d7-144a1e45c294",
+          "name": "Balance",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{local}}/wallets/:userId/balance",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "wallets",
+                ":userId",
+                "balance"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{user1}}",
+                  "uuid": "ec70c2c3-e0f8-43d3-b03d-7b2f5291dc01"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "3b2d9aed-9b99-4e51-b8f4-98d2d8312c32"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 16:09:02 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "119"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T16:09:05.059Z",
+          "body": "{\n    \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n    \"balances\": {\n        \"MXN\": 250000,\n        \"USD\": 119600\n    },\n    \"name\": \"Arthur Schoppenhauer\"\n}"
+        }
+      ]
     },
     {
       "name": "Transactions",
@@ -234,31 +601,106 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/transactions?limit=20&offset=0",
-          "protocol": "http",
+          "raw": "{{local}}/wallets/:userid/transactions?limit=20&offset=0",
           "host": [
-            "localhost"
+            "{{local}}"
           ],
-          "port": "8080",
           "path": [
             "wallets",
-            "2d10b397-e0f3-4e61-9897-7e52bc2fda33",
+            ":userid",
             "transactions"
           ],
           "query": [
             {
               "key": "limit",
-              "value": "20"
+              "value": "20",
+              "uuid": "dccf0eee-9700-438e-ab94-e78e0cc53b4d"
             },
             {
               "key": "offset",
-              "value": "0"
+              "value": "0",
+              "uuid": "ac189a4a-dd10-481e-8d7f-69bca337fc18"
+            }
+          ],
+          "variable": [
+            {
+              "key": "userid",
+              "value": "{{user1}}",
+              "uuid": "ecb40897-7962-46a4-9414-d623ab124196"
             }
           ]
         },
-        "description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/transactions?limit=20&offset=0' \\\n  -H 'accept: application/json'"
+        "description": "Obtains a paginated list of the transactions correspondant to a userId.\n\nGenerated from cURL: curl -X 'GET'  \n'[http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/transactions?limit=20&amp;offset=0'](http://localhost:8080/wallets/2d10b397-e0f3-4e61-9897-7e52bc2fda33/transactions?limit=20&offset=0')  \n\\-H 'accept: application/json'"
       },
-      "response": []
+      "response": [
+        {
+          "id": "6ae8d4ff-9a0c-46d9-aea5-760a19b63f71",
+          "name": "Transactions",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{local}}/wallets/:userid/transactions?limit=20&offset=0",
+              "host": [
+                "{{local}}"
+              ],
+              "path": [
+                "wallets",
+                ":userid",
+                "transactions"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "uuid": "dccf0eee-9700-438e-ab94-e78e0cc53b4d"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "uuid": "ac189a4a-dd10-481e-8d7f-69bca337fc18"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "userid",
+                  "value": "{{user1}}",
+                  "uuid": "ecb40897-7962-46a4-9414-d623ab124196"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "X-Request-Id",
+              "value": "b0212d44-612f-4e20-80dd-35f2c9996e42"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 24 Dec 2025 16:09:07 GMT"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            }
+          ],
+          "cookie": [],
+          "responseTime": "2025-12-24T16:09:10.419Z",
+          "body": "{\n    \"transactions\": [\n        {\n            \"id\": \"f14ae620-dae3-49ee-adf8-82cd4ca07404\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"TOP_UP\",\n            \"amount\": 10000,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"00000000-0000-0000-0000-000000000000\",\n            \"external_reference\": \"top-up\",\n            \"created_at\": \"2025-12-24T16:08:57.637547Z\",\n            \"updated_at\": \"2025-12-24T16:08:57.640334Z\"\n        },\n        {\n            \"id\": \"73ba857a-5da9-4baf-8e4c-35ad1a21ee6b\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"PAYMENT\",\n            \"amount\": 100,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n            \"external_reference\": \"Leo user\",\n            \"created_at\": \"2025-12-24T16:08:33.2037Z\",\n            \"updated_at\": \"2025-12-24T16:08:33.225723Z\"\n        },\n        {\n            \"id\": \"64c34873-f869-457d-84d2-d7aec50a70e6\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"PAYMENT\",\n            \"amount\": 100,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n            \"external_reference\": \"Leo user\",\n            \"created_at\": \"2025-12-24T16:07:51.309817Z\",\n            \"updated_at\": \"2025-12-24T16:07:51.392709Z\"\n        },\n        {\n            \"id\": \"e7d0764f-876a-4037-bc2c-8852318a8a1f\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"TOP_UP\",\n            \"amount\": 10000,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"00000000-0000-0000-0000-000000000000\",\n            \"external_reference\": \"top-up\",\n            \"created_at\": \"2025-12-24T16:04:33.043503Z\",\n            \"updated_at\": \"2025-12-24T16:04:33.048021Z\"\n        },\n        {\n            \"id\": \"5878e943-d7ea-4948-9abd-aba550d79868\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"PAYMENT\",\n            \"amount\": 200,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n            \"external_reference\": \"Leo user\",\n            \"created_at\": \"2025-12-24T15:37:04.465449Z\",\n            \"updated_at\": \"2025-12-24T15:37:04.715536Z\"\n        },\n        {\n            \"id\": \"77777777-7777-7777-7777-777777777777\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"REFUND\",\n            \"amount\": 15000,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"99999999-9999-9999-9999-999999999999\",\n            \"external_reference\": \"seed-refund-1\",\n            \"created_at\": \"2025-12-24T14:50:06.623983Z\",\n            \"updated_at\": \"2025-12-24T14:50:06.623983Z\"\n        },\n        {\n            \"id\": \"66666666-6666-6666-6666-666666666666\",\n            \"user_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n            \"type\": \"PAYMENT\",\n            \"amount\": 15000,\n            \"currency\": \"USD\",\n            \"status\": \"APPROVED\",\n            \"provider_id\": \"99999999-9999-9999-9999-999999999999\",\n            \"external_reference\": \"seed-payment-1\",\n            \"created_at\": \"2025-12-24T14:50:06.623983Z\",\n            \"updated_at\": \"2025-12-24T14:50:06.623983Z\"\n        }\n    ],\n    \"total\": 7\n}"
+        }
+      ]
     }
   ]
 }

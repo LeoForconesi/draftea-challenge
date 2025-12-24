@@ -1,5 +1,6 @@
-Challenge description:
-[semi-sr-backend-challenge.pdf](https://github.com/user-attachments/files/24297353/semi-sr-backend-challenge.pdf)
+# Challenge description:
+
+↩️ [Return to README](../README.md)
 
 # PARTE 1: DESAFÍO DE DISEÑO DE
 ## ARQUITECTURA
@@ -149,3 +150,5 @@ Entrega
   - Endpoints disponibles con ejemplos
   - Mejoras futuras identificadas
 3. Compartir el link del repositorio
+
+Challenge original doc download: [semi-sr-backend-challenge.pdf](https://github.com/user-attachments/files/24297353/semi-sr-backend-challenge.pdf)
