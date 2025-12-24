@@ -40,7 +40,7 @@ jobs:
         id: verify
         uses: tj-actions/verify-changed-files@v20
         with:
-          files: README.md coverage-badge.svg
+          files: README.md
 
       - name: Commit & Push updated badge and README
         if: steps.verify.outputs.files_changed == 'true'
