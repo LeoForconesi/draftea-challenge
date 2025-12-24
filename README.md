@@ -76,6 +76,7 @@ I've created some test-only endpoints to facilitate local testing and visibility
 If `app.api_key` is set, include the header `X-API-Key: <your-api-key>` on requests. app.api_key is only set in local and docker configs for testing convenience.
 In production, use proper authN/authZ (e.g., OAuth2/JWT + user service).
 
+---
 ## Included
 - Idempotent payment processing with `Idempotency-Key` header.
 - Outbox pattern with RabbitMQ for async event publishing.
@@ -95,6 +96,7 @@ In production, use proper authN/authZ (e.g., OAuth2/JWT + user service).
 - Postman collection for easy API exploration.
 - Usage of IA for coding assistance and documentation.
 ---
+
 ## Some tools used in this project:
 - [Mermaid](https://mermaid-js.github.io/mermaid/#/) - for diagrams in documentation.
 - [Swagger UI](https://swagger.io/tools/swagger-ui/) - for interactive API docs.
@@ -119,3 +121,4 @@ Any questions or feedback are welcome! Feel free to open an issue or reach out d
    <a href="https://www.linkedin.com/in/leonardo-forconesi/">
     <img src="docs/resources/LinkedIn_icon.svg.png" alt="LinkedIn" width="24" height="24">
    </a>
+

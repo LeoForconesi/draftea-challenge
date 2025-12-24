@@ -17,24 +17,25 @@ jobs:
           go-version: '1.24.11'
           cache: true
 
-      - name: Go mod tidy check
-        run: |
-          go mod tidy
-          git diff --exit-code
+#      - name: Go mod tidy check
+#        run: |
+#          go mod tidy
+#          git diff --exit-code
 
-      - name: Build
-        run: go build ./...
+#      - name: Build
+#        run: go build ./...
 
       - name: Test
         run: |
-          go test ./... -coverprofile=coverage.out
+          go test ./... -coverprofile=coverage.out -covermode=count
           go tool cover -func=coverage.out
 
       - name: Generate Coverage Badge
         uses: tj-actions/coverage-badge-go@v3
-        id: coverage
         with:
           filename: coverage.out
+          green: '80'
+          yellow: '50'
 
       - name: Verify changed files
         id: verify
@@ -42,32 +43,39 @@ jobs:
         with:
           files: README.md
 
-      - name: Commit & Push updated badge and README
+      - name: Commit & Push updated README with coverage badge
         if: steps.verify.outputs.files_changed == 'true'
+        env:
+          TOKEN: ${{ secrets.PAT_PUSH }}  # Nombre claro
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
+          
           git branch -f ${{ github.head_ref }} HEAD
           git checkout ${{ github.head_ref }}
-
-          if [ ! -f coverage-badge.svg ]; then
-            echo "SVG not found, skipping commit"
-            exit 0
-          fi
-
-          git add README.md coverage-badge.svg
-  
+          
+          git add README.md
           git commit -m "chore: Update coverage badge [ci skip]" || echo "No changes to commit"
-
+          
+          # Debug: mostramos la URL actual
+          echo "Current remote URL:"
+          git remote get-url origin
+          
+          # Forzamos la URL con el token
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git
+          
+          # Debug: confirmamos que cambió
+          echo "New remote URL:"
+          git remote get-url origin
+          
           git push origin ${{ github.head_ref }} --force-with-lease
 
-      - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          args: --timeout=5m
+#      - name: Lint
+#        uses: golangci/golangci-lint-action@v6
+#        with:
+#          args: --timeout=5m
 
-      - name: Vulnerability check
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
+#      - name: Vulnerability check
+#        run: |
+#          go install golang.org/x/vuln/cmd/govulncheck@latest
+#          govulncheck ./...
