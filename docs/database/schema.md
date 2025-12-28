@@ -4,6 +4,80 @@
 ## Relation diagram
 ![database schema](docs/resources/Db-relation-diagram.svg)
 
+<details>
+<summary>Code DBML of the schema</summary>
+
+Copy and paste the following code into https://dbdiagram.io/d to visualize the database schema or modify it.
+
+```DBML
+Table wallets {
+id varchar(36) [pk]
+user_id varchar(36) [unique, not null]
+name char(20)
+created_at timestamptz [not null]
+}
+
+Table wallet_balances {
+id varchar(36) [pk]
+wallet_id varchar(36) [not null]
+user_id varchar(36) [not null]
+currency varchar(8) [not null]
+current_balance bigint [not null, default: 0]
+created_at timestamptz [not null]
+updated_at timestamptz [not null]
+
+Indexes {
+(user_id, currency) [unique]
+}
+}
+
+Table transactions {
+id varchar(36) [pk]
+wallet_id varchar(36) [not null]
+user_id varchar(36) [not null]
+type varchar(32) [not null]
+amount bigint [not null]
+currency varchar(8) [not null]
+status varchar(32) [not null]
+provider_id varchar(36)
+external_reference text
+created_at timestamptz [not null]
+updated_at timestamptz [not null]
+
+Indexes {
+wallet_id
+user_id
+created_at
+}
+}
+
+Table idempotency_records {
+id varchar(36) [pk]
+user_id varchar(36) [not null]
+key text [not null]
+request_id varchar(36) [not null]
+response jsonb [not null]
+created_at timestamptz [not null]
+
+Indexes {
+(user_id, key) [unique]
+}
+}
+
+Table outbox {
+id varchar(36) [pk]
+event_type varchar(128) [not null]
+payload jsonb [not null]
+created_at timestamptz [not null]
+sent_at timestamptz
+}
+
+Ref: wallet_balances.wallet_id > wallets.id
+Ref: transactions.wallet_id > wallets.id
+```
+
+</details>
+
 ## Tables
 ### wallets
 - id (varchar(36), PK)
